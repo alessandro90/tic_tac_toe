@@ -132,6 +132,7 @@ QLabel {
     <addaction name="actionSetAsServer"/>
     <addaction name="actionSetAsClient"/>
     <addaction name="actionConnect"/>
+    <addaction name="actionInfo"/>
    </widget>
    <addaction name="menuConnections"/>
   </widget>
@@ -154,6 +155,11 @@ QLabel {
   <action name="actionDisconnect">
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionInfo">
+   <property name="text">
+    <string>Info</string>
    </property>
   </action>
  </widget>

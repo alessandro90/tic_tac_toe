@@ -1,6 +1,6 @@
 import sys
 from functools import partial
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from players import Player
@@ -42,14 +42,21 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
             self.setConnected
         )
 
+        self.connectionInitializer.connectionError.connect(
+            self.disconnect
+        )
+
         self.actionConnect.triggered.connect(
             lambda: self.connectionInitializer.start.emit())
+
+        self.actionInfo.triggered.connect(self.showInfoBox)
 
         self.msgThread = QThread()
         self.msgThread.start()
         self.messageInterface = MessageInterface(self.player)
         self.messageInterface.msgSent.connect(self.messageSent)
         self.messageInterface.msgReceived.connect(self.messageReceived)
+        self.messageInterface.msgError.connect(self.disconnect)
         self.messageInterface.moveToThread(self.msgThread)
 
         self.signalInitializeConn.connect(
@@ -76,6 +83,14 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
         self.player.isReceiving = False
 
     @pyqtSlot()
+    def disconnect(self):
+        self.connected = False
+        self.player.socket.close()
+        if self.player.isServer:
+            self.player.clientSocket.close()
+        self.player.reset()
+
+    @pyqtSlot()
     def setConnected(self):
         self.connected = True
         if self.player.isServer:
@@ -84,15 +99,17 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def makeServerPlayer(self):
-        self.player.setRole("server")
-        self.player.isReceiving = True
-        self.updateStatusBar()
+        if not self.connected:
+            self.player.setRole("server")
+            self.player.isReceiving = True
+            self.updateStatusBar()
 
     @pyqtSlot()
     def makeClientPlayer(self):
-        self.player.setRole("client")
-        self.player.isSending = True
-        self.updateStatusBar()
+        if not self.connected:
+            self.player.setRole("client")
+            self.player.isSending = True
+            self.updateStatusBar()
 
     def updateStatusBar(self):
         self.statusbar.showMessage(
@@ -106,6 +123,22 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
                 cell.drawShape(self.player.shape)
                 self.player.msgCell = str(cell.index)
                 self.signalConnection.emit()
+
+    @pyqtSlot()
+    def showInfoBox(self):
+        msg = f"Status: {self.player.strStatus}.\n" + \
+            f"Symbol: {self.player.strSymbol}.\n" + \
+            f"Connection: {'Connected' if self.connected else 'Not connected'}"
+        box = QMessageBox(self)
+        box.setWindowTitle("Connection info")
+        box.setText(msg)
+        box.setStyleSheet(
+            """
+            background-color: #282828;
+            color: #ffffff;
+            """
+        )
+        box.show()
 
     def closeEvent(self, event):
         self.connectionThread.quit()

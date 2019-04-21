@@ -11,6 +11,20 @@ class Player:
         self.strSymbol = ""
         self.clientSocket = None
         self.socket = None
+        self.strStatus = ""
+        self.__isReceiving = False
+        self.__isSending = False
+        self.msgCell = ""
+
+    def reset(self):
+        self.isServer = False
+        self.isClient = False
+        self.shape = Shape.NONE
+        self.opponentShape = Shape.NONE
+        self.strSymbol = ""
+        self.clientSocket = None
+        self.socket = None
+        self.strStatus = ""
         self.__isReceiving = False
         self.__isSending = False
         self.msgCell = ""
