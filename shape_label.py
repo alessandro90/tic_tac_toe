@@ -15,6 +15,7 @@ class ShapeLabel(QLabel):
         self.pen = QPen()
         self.pen.setWidth(20)
         self.shouldPaint = False
+        self.index = None
 
     @property
     def hasShape(self):
