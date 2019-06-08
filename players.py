@@ -4,17 +4,7 @@ from shapes import Shape
 
 class Player:
     def __init__(self):
-        self.isServer = False
-        self.isClient = False
-        self.shape = Shape.NONE
-        self.opponentShape = Shape.NONE
-        self.strSymbol = ""
-        self.clientSocket = None
-        self.socket = None
-        self.strStatus = ""
-        self.__isReceiving = False
-        self.__isSending = False
-        self.msgCell = ""
+        self.reset()
 
     def reset(self):
         self.isServer = False
@@ -25,27 +15,28 @@ class Player:
         self.clientSocket = None
         self.socket = None
         self.strStatus = ""
-        self.__isReceiving = False
-        self.__isSending = False
+        self._isReceiving = False
+        self._isSending = False
         self.msgCell = ""
+        self.isWinner = False
 
     @property
     def isReceiving(self):
-        return self.__isReceiving
+        return self._isReceiving
 
     @isReceiving.setter
     def isReceiving(self, value):
-        self.__isReceiving = value
-        self.__isSending = not value
+        self._isReceiving = value
+        self._isSending = not value
 
     @property
     def isSending(self):
-        return self.__isSending
+        return self._isSending
 
     @isSending.setter
     def isSending(self, value):
-        self.__isSending = value
-        self.__isReceiving = not value
+        self._isSending = value
+        self._isReceiving = not value
 
     def setRole(self, role):
         if role == "server":

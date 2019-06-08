@@ -11,21 +11,18 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Tic Tac Toe</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget {
-	background-color: #a7a7a7;
-}
-
-QLabel {
-	background-color: #282828;
-}</string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="ShapeLabel" name="cell_0">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -36,6 +33,9 @@ QLabel {
     </item>
     <item row="0" column="1">
      <widget class="ShapeLabel" name="cell_1">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -46,6 +46,9 @@ QLabel {
     </item>
     <item row="0" column="2">
      <widget class="ShapeLabel" name="cell_2">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -56,6 +59,9 @@ QLabel {
     </item>
     <item row="1" column="0">
      <widget class="ShapeLabel" name="cell_3">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -66,6 +72,9 @@ QLabel {
     </item>
     <item row="1" column="1">
      <widget class="ShapeLabel" name="cell_4">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -76,6 +85,9 @@ QLabel {
     </item>
     <item row="3" column="2">
      <widget class="ShapeLabel" name="cell_8">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -86,6 +98,9 @@ QLabel {
     </item>
     <item row="1" column="2">
      <widget class="ShapeLabel" name="cell_5">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -96,6 +111,9 @@ QLabel {
     </item>
     <item row="3" column="0">
      <widget class="ShapeLabel" name="cell_6">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -106,6 +124,9 @@ QLabel {
     </item>
     <item row="3" column="1">
      <widget class="ShapeLabel" name="cell_7">
+      <property name="styleSheet">
+       <string notr="true">background-color: #282828;</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>

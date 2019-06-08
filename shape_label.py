@@ -27,19 +27,19 @@ class ShapeLabel(QLabel):
         else:
             super().mousePressEvent(event)
 
-    def __getDimensions(self):
+    def _getDimensions(self):
         return self.size().width(), self.size().height()
 
     def drawCircle(self):
         painter = QPainter(self)
         self.pen.setColor(QColor.fromRgb(236, 47, 47))
         painter.setPen(self.pen)
-        w, h = self.__getDimensions()
+        w, h = self._getDimensions()
         painter.drawEllipse(self.delta, self.delta,
                             w - 2 * self.delta, h - 2 * self.delta)
 
     def drawCross(self):
-        w, h = self.__getDimensions()
+        w, h = self._getDimensions()
         painter = QPainter(self)
         self.pen.setColor(QColor.fromRgb(47, 101, 236))
         painter.setPen(self.pen)
@@ -58,4 +58,4 @@ class ShapeLabel(QLabel):
 
     def drawShape(self, shape):
         self.currentShape = shape
-        self.update()
+        self.repaint()

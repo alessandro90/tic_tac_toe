@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
+
 _HOST = '127.0.0.1'
 _PORT = 65432
 
@@ -18,10 +19,14 @@ class ConnectionInitializer(QObject):
     @pyqtSlot()
     def establishConnection(self):
         if self.player.isServer:
-            self.player.socket.bind((_HOST, _PORT))
-            self.player.socket.listen()
-            self.player.clientSocket, _ = self.player.socket.accept()
-            self.connectionEstablished.emit()
+            try:
+                self.player.socket.bind((_HOST, _PORT))
+            except Exception:
+                self.connectionError.emit()
+            else:
+                self.player.socket.listen()
+                self.player.clientSocket, _ = self.player.socket.accept()
+                self.connectionEstablished.emit()
         elif self.player.isClient:
             try:
                 self.player.socket.connect((_HOST, _PORT))
@@ -33,7 +38,7 @@ class ConnectionInitializer(QObject):
 
 class MessageInterface(QObject):
 
-    commStart = pyqtSignal()
+    commStart = pyqtSignal()  # FIXME: Never used
     msgSent = pyqtSignal()
     msgReceived = pyqtSignal()
     msgError = pyqtSignal()
@@ -41,7 +46,7 @@ class MessageInterface(QObject):
     def __init__(self, player, parent=None):
         super().__init__(parent)
         self.player = player
-        self.commStart.connect(self.communicate)
+        self.commStart.connect(self.communicate)  # FIXME: Never used
 
     def communicate(self):
         if self.player.isReceiving:

@@ -5,6 +5,9 @@ from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot, QThread, pyqtSignal
 from players import Player
 from connections import ConnectionInitializer, MessageInterface
+from board import Board
+from result import Result
+
 
 qtCreatorFile = "tic_tac_ui.ui"
 Ui_MainWindow, _ = uic.loadUiType(qtCreatorFile)
@@ -18,16 +21,20 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.endOfGame = False
+        self.cells = (
+            self.cell_0,
+            self.cell_1,
+            self.cell_2,
+            self.cell_3,
+            self.cell_4,
+            self.cell_5,
+            self.cell_6,
+            self.cell_7,
+            self.cell_8
+        )
 
-        self.cells = [self.cell_0,
-                      self.cell_1,
-                      self.cell_2,
-                      self.cell_3,
-                      self.cell_4,
-                      self.cell_5,
-                      self.cell_6,
-                      self.cell_7,
-                      self.cell_8]
+        self.board = Board(self.cells)
 
         self.connected = False
         self.player = Player()
@@ -47,7 +54,8 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
         )
 
         self.actionConnect.triggered.connect(
-            lambda: self.connectionInitializer.start.emit())
+            lambda: self.connectionInitializer.start.emit()
+        )
 
         self.actionInfo.triggered.connect(self.showInfoBox)
 
@@ -73,22 +81,33 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def messageSent(self):
-        self.player.isSending = False
-        self.signalConnection.emit()
+        self.checkForWinner()
+        if self.endOfGame and self.player.matchResult is Result.WIN:
+            self.player.isSending = True
+        else:
+            self.player.isReceiving = True
+            self.signalConnection.emit()
 
     @pyqtSlot()
     def messageReceived(self):
         index = int(self.player.msgCell)
         self.cells[index].drawShape(self.player.opponentShape)
-        self.player.isReceiving = False
+        self.checkForWinner()
+        if self.endOfGame and self.player.matchResult is Result.LOOSE:
+            self.player.isReceiving = True
+            self.signalConnection.emit()
+        else:
+            self.player.isSending = True
 
     @pyqtSlot()
     def disconnect(self):
         self.connected = False
-        self.player.socket.close()
-        if self.player.isServer:
+        if self.player.socket is not None:
+            self.player.socket.close()
+        if self.player.clientSocket is not None:
             self.player.clientSocket.close()
         self.player.reset()
+        self.updateStatusBar()
 
     @pyqtSlot()
     def setConnected(self):
@@ -118,17 +137,44 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def drawShape(self, cell):
-        if self.player.isSending:
+        if self.player.isSending and self.connected:
             if self.player is not None and not cell.hasShape:
                 cell.drawShape(self.player.shape)
                 self.player.msgCell = str(cell.index)
                 self.signalConnection.emit()
 
+    def checkForWinner(self):
+        mustClean = False
+        self.endOfGame = False
+        if self.board.checkForWinner(self.player.shape):
+            self.board.showWinningCells()
+            matchResult = Result.WIN
+            mustClean = True
+        elif self.board.checkForWinner(self.player.opponentShape):
+            self.board.showWinningCells()
+            matchResult = Result.LOOSE
+            mustClean = True
+        elif self.board.boardIsFull():
+            mustClean = True
+            matchResult = Result.TIE
+        if mustClean:
+            self.endOfGame = True
+            self.player.matchResult = matchResult
+            self.board.clean()
+
     @pyqtSlot()
     def showInfoBox(self):
         msg = f"Status: {self.player.strStatus}.\n" + \
-            f"Symbol: {self.player.strSymbol}.\n" + \
-            f"Connection: {'Connected' if self.connected else 'Not connected'}"
+            f"Symbol: {self.player.strSymbol}.\n"
+        status = 'Connected' if self.connected else 'Not connected'
+        msg += f"Connection: {status}.\n"
+        if self.connected:
+            if self.player.isSending:
+                msg += "Your turn."
+            else:
+                msg += "Opponent turn."
+        else:
+            msg += "No player 2."
         box = QMessageBox(self)
         box.setWindowTitle("Connection info")
         box.setText(msg)
@@ -142,14 +188,15 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, event):
         self.connectionThread.quit()
+        self.connectionThread.terminate()
         self.connectionThread.wait()
         self.msgThread.quit()
         self.msgThread.terminate()
         self.msgThread.wait()
         if self.player.socket is not None:
             self.player.socket.close()
-            if self.player.clientSocket is not None:
-                self.player.clientSocket.close()
+        if self.player.clientSocket is not None:
+            self.player.clientSocket.close()
         super().closeEvent(event)
 
 
