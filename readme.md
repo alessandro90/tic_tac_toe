@@ -1,0 +1,1 @@
+Very simple tic tac toe game. The goal was just to use python sockets to connect two devices in the same network.
