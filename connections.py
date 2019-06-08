@@ -19,6 +19,7 @@ class ConnectionInitializer(QObject):
             self._host = _HOST
         else:
             self._host = host_name
+        self.closeApp = False
 
     @pyqtSlot()
     def establishConnection(self):
@@ -29,8 +30,17 @@ class ConnectionInitializer(QObject):
                 self.connectionError.emit()
             else:
                 self.player.socket.listen()
-                self.player.clientSocket, _ = self.player.socket.accept()
-                self.connectionEstablished.emit()
+                while True:
+                    try:
+                        self.player.clientSocket, _ = self.player.socket.accept()
+                    except Exception:
+                        pass
+                    else:
+                        self.clientSocket.settimeout(1)
+                        self.connectionEstablished.emit()
+                        break
+                    if self.closeApp:
+                        break
         elif self.player.isClient:
             try:
                 self.player.socket.connect((self._host, _PORT))
@@ -42,7 +52,6 @@ class ConnectionInitializer(QObject):
 
 class MessageInterface(QObject):
 
-    commStart = pyqtSignal()  # FIXME: Never used
     msgSent = pyqtSignal()
     msgReceived = pyqtSignal()
     msgError = pyqtSignal()
@@ -50,18 +59,22 @@ class MessageInterface(QObject):
     def __init__(self, player, parent=None):
         super().__init__(parent)
         self.player = player
-        self.commStart.connect(self.communicate)  # FIXME: Never used
+        self.closeApp = False
 
     def communicate(self):
         if self.player.isReceiving:
-            try:
-                if self.player.isServer:
-                    data = self.player.clientSocket.recv(1024)
-                else:
-                    data = self.player.socket.recv(1024)
-            except Exception:
-                self.msgError.emit()
-            if data:
+            data = None
+            while True:
+                try:
+                    if self.player.isServer:
+                        data = self.player.clientSocket.recv(1024)
+                    else:
+                        data = self.player.socket.recv(1024)
+                except Exception:
+                    pass
+                if data or self.closeApp:
+                    break
+            if data is not None:
                 self.player.msgCell = data.decode()
                 self.msgReceived.emit()
         elif self.player.isSending:

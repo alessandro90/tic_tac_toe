@@ -56,6 +56,7 @@ class Player:
             raise NotImplementedError
         self.strStatus = role
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(1)
 
     def __str__(self):
         return f"Status: {self.strStatus}, symbol: {self.strSymbol}"

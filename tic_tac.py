@@ -43,7 +43,9 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
         self.connectionThread = QThread()
         self.connectionThread.start()
-        self.connectionInitializer = ConnectionInitializer(self.player, host_name)
+        self.connectionInitializer = ConnectionInitializer(
+            self.player, host_name
+        )
         self.connectionInitializer.moveToThread(self.connectionThread)
         self.connectionInitializer.connectionEstablished.connect(
             self.setConnected
@@ -186,17 +188,20 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
         )
         box.show()
 
-    def closeEvent(self, event):
-        self.connectionThread.quit()
-        self.connectionThread.terminate()
-        self.connectionThread.wait()
-        self.msgThread.quit()
-        self.msgThread.terminate()
-        self.msgThread.wait()
+    def closeSocketsAndThreads(self):
         if self.player.socket is not None:
             self.player.socket.close()
         if self.player.clientSocket is not None:
             self.player.clientSocket.close()
+        self.connectionInitializer.closeApp = True
+        self.messageInterface.closeApp = True
+        self.connectionThread.quit()
+        self.connectionThread.wait()
+        self.msgThread.quit()
+        self.msgThread.wait()
+
+    def closeEvent(self, event):
+        self.closeSocketsAndThreads()
         super().closeEvent(event)
 
 
