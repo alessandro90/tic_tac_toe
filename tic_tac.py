@@ -18,7 +18,7 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
     signalConnection = pyqtSignal()
     signalInitializeConn = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, host_name):
         super().__init__()
         self.setupUi(self)
         self.endOfGame = False
@@ -43,7 +43,7 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
         self.connectionThread = QThread()
         self.connectionThread.start()
-        self.connectionInitializer = ConnectionInitializer(self.player)
+        self.connectionInitializer = ConnectionInitializer(self.player, host_name)
         self.connectionInitializer.moveToThread(self.connectionThread)
         self.connectionInitializer.connectionEstablished.connect(
             self.setConnected
@@ -202,6 +202,10 @@ class TicTacMainWin(QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     myApp = QApplication(sys.argv)
-    game = TicTacMainWin()
+    if len(sys.argv) == 2:
+        host_name = sys.argv[1]
+    else:
+        host_name = None
+    game = TicTacMainWin(host_name)
     game.show()
     sys.exit(myApp.exec_())

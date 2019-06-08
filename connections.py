@@ -11,16 +11,20 @@ class ConnectionInitializer(QObject):
     connectionEstablished = pyqtSignal()
     connectionError = pyqtSignal()
 
-    def __init__(self, player, parent=None):
+    def __init__(self, player, host_name, parent=None):
         super().__init__(parent)
         self.player = player
         self.start.connect(self.establishConnection)
+        if host_name is None:
+            self._host = _HOST
+        else:
+            self._host = host_name
 
     @pyqtSlot()
     def establishConnection(self):
         if self.player.isServer:
             try:
-                self.player.socket.bind((_HOST, _PORT))
+                self.player.socket.bind((self._host, _PORT))
             except Exception:
                 self.connectionError.emit()
             else:
@@ -29,7 +33,7 @@ class ConnectionInitializer(QObject):
                 self.connectionEstablished.emit()
         elif self.player.isClient:
             try:
-                self.player.socket.connect((_HOST, _PORT))
+                self.player.socket.connect((self._host, _PORT))
             except Exception:
                 self.connectionError.emit()
             else:
